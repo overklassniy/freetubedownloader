@@ -4,7 +4,7 @@ import sys
 
 import yt_dlp
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
-
+from PyQt5 import QtGui
 from static.QtUI.freetubedownloader import Ui_MainWindow
 
 
@@ -13,6 +13,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setFixedSize(800, 620)
+        self.setWindowIcon(QtGui.QIcon('static/img/icon.ico'))
         self.setFocus()
         self.linksEdit.setPlainText("")
         self.statusBar.setStyleSheet("background-color : white")
