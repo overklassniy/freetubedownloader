@@ -6,9 +6,26 @@ import yt_dlp
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt5 import QtGui
 from static.QtUI.freetubedownloader import Ui_MainWindow
+import os
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
+
+    def progresshook(self, d):
+        if d['status'] == 'finished':
+            file_tuple = os.path.split(os.path.abspath(d['filename']))
+            print("Done downloading {}".format(file_tuple[1]))
+        if d['status'] == 'downloading':
+            filename = d['filename']
+            if len(filename[:-14]) > 70:
+                filename = filename[:70] + '...'
+            else:
+                filename = filename[:-14]
+            self.statusBar.showMessage(f"Downloading {filename} {d['_percent_str']} ETA: {d['_eta_str']}")
+            self.statusBar.setStyleSheet("background-color : yellow; color: #323232")
+            self.statusBar.repaint()
+            print(d['filename'], d['_percent_str'], d['_eta_str'])
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -35,13 +52,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def video_download(self, url, out):
         ydl_opts = {
             'outtmpl': f'{out}%(title)s' + '.mp4',
-            'overwrites': True
+            'overwrites': True,
+            'progress_hooks': [self.progresshook],
+            'ignoreerrors': True
         }
         ydl = yt_dlp.YoutubeDL(ydl_opts)
 
         try:
             ydl.download(url)
         except Exception as e:
+            print(e, e, e)
             return e
 
     def audio_download(self, url, out):
@@ -53,7 +73,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             }],
             'ffmpeg_location': 'static/ffmpeg/bin/',
             'overwrites': True,
-            'outtmpl': f'{out}%(title)s' + '.mp3'
+            'outtmpl': f'{out}%(title)s' + '.mp3',
+            'progress_hooks': [self.progresshook],
+            'ignoreerrors': True
         }
         ydl = yt_dlp.YoutubeDL(ydl_opts)
         try:
@@ -69,25 +91,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def video_download_button(self):
         self.get_urls()
         if self.check():
-            self.statusBar.showMessage('Downloading!')
-            self.statusBar.setStyleSheet("background-color : yellow")
-            self.statusBar.repaint()
             self.video_download(self.urls, self.out_dir)
             self.statusBar.showMessage('Done!')
-            self.statusBar.setStyleSheet("background-color : green")
+            self.statusBar.setStyleSheet("background-color : green; color: #eff0f1")
 
     def audio_download_button(self):
         self.get_urls()
         if self.check():
-            self.statusBar.showMessage('Downloading!')
-            self.statusBar.setStyleSheet("background-color : yellow")
-            self.statusBar.repaint()
             self.audio_download(self.urls, self.out_dir)
             self.statusBar.showMessage('Done!')
-            self.statusBar.setStyleSheet("background-color : green")
+            self.statusBar.setStyleSheet("background-color : green; color: #eff0f1")
 
     def browse_button(self):
-        self.statusBar.setStyleSheet("background-color : white")
+        self.statusBar.setStyleSheet("background-color : #323232")
         self.statusBar.clearMessage()
         self.statusBar.repaint()
         self.out_dir = QFileDialog.getExistingDirectory(self, 'Browse output directory', '') + '/'
@@ -98,7 +114,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def check(self):
         if self.out_dir == 'NODIR':
-            self.statusBar.setStyleSheet("background-color : pink")
+            self.statusBar.setStyleSheet("background-color : pink; color: #323232")
             self.statusBar.showMessage('Please browse your output directory!')
             return False
         return True

@@ -71,6 +71,7 @@ class Ui_MainWindow(object):
         self.statusBar.setFont(font)
         self.statusBar.setObjectName("statusBar")
         MainWindow.setStatusBar(self.statusBar)
+        MainWindow.setStyleSheet(open('static/QtUI/style.css').read())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
