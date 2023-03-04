@@ -16,7 +16,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             file_tuple = os.path.split(os.path.abspath(d['filename']))
             print("Done downloading {}".format(file_tuple[1]))
         if d['status'] == 'downloading':
-            filename = d['filename']
+            filename = d['filename'][len(self.out_dir):]
+            print('\n\n', self.out_dir, len(self.out_dir), filename, d['filename'])
             if len(filename[:-14]) > 70:
                 filename = filename[:70] + '...'
             else:
@@ -51,6 +52,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def video_download(self, url, out):
         ydl_opts = {
+            'format': 'mp4/bestvideo+bestaudio/best',
             'outtmpl': f'{out}%(title)s' + '.mp4',
             'overwrites': True,
             'progress_hooks': [self.progresshook],
@@ -73,7 +75,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             }],
             'ffmpeg_location': 'static/ffmpeg/bin/',
             'overwrites': True,
-            'outtmpl': f'{out}%(title)s' + '.mp3',
+            'outtmpl': f'{out}%(title)s',
             'progress_hooks': [self.progresshook],
             'ignoreerrors': True
         }
